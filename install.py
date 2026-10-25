@@ -55,29 +55,53 @@ def tty_input(prompt: str, default: str = "") -> str:
     except Exception:
         return default
 
-
-def is_local_repo() -> bool:
-    """Checks if the script is running from a local git clone."""
-    try:
-        here = Path(__file__).resolve().parent
-        return (here / "mcp_cad_server" / "server.py").exists()
-    except NameError:
-        # Running via stdin (curl | python3 -)
-        return False
-
-
 def get_venv_paths(venv_dir: Path) -> tuple[Path, Path]:
     if platform.system() == "Windows":
         return venv_dir / "Scripts" / "python.exe", venv_dir / "Scripts" / "agentic-cad-mcp.exe"
     return venv_dir / "bin" / "python", venv_dir / "bin" / "agentic-cad-mcp"
 
+def is_local_repo() -> bool:
+    """Checks if the script is running from a local git clone (and NOT inside site-packages)."""
+    try:
+        here = Path(__file__).resolve().parent
+        if "site-packages" in here.parts or "dist-packages" in here.parts:
+            return False
+        return (here / "pyproject.toml").exists() and (here / "mcp_cad_server" / "server.py").exists()
+    except NameError:
+        # Running via stdin (curl | python3 -)
+        return False
+
+
+def is_already_installed_package() -> bool:
+    """Checks if install.py is being run as an installed pip package (e.g. via agentic-cad-mcp-setup)."""
+    try:
+        here = Path(__file__).resolve().parent
+        return "site-packages" in here.parts or "dist-packages" in here.parts
+    except NameError:
+        return False
+
 
 def setup_environment(skip_deps: bool = False) -> tuple[Path, list[str]]:
     """
-    Sets up the virtual environment (in ~/.agentic-cad-mcp/venv for zero-clone,
-    or ./.venv for local clone) and installs the package via pip.
-    Returns (command_path, args_list) for the MCP config.
+    1) If already installed via pip (agentic-cad-mcp-setup), reuse the current Python environment directly.
+    2) If running from a local git clone, use ./.venv.
+    3) If running via curl | python3 -, create ~/.agentic-cad-mcp/venv.
     """
+    # CASE 1: Running via 'agentic-cad-mcp-setup' after 'pip install'
+    if is_already_installed_package():
+        current_py = Path(sys.executable).resolve()
+        current_bin_dir = current_py.parent
+        cli_name = "agentic-cad-mcp.exe" if platform.system() == "Windows" else "agentic-cad-mcp"
+        cli_bin = current_bin_dir / cli_name
+
+        print_step(f"Detected pre-installed package in {current_bin_dir.parent}")
+        print_ok("Skipping environment creation and dependency installation.")
+
+        if cli_bin.exists():
+            return cli_bin, []
+        return current_py, ["-u", "-m", "mcp_cad_server.server"]
+
+    # CASE 2 & 3: Local repo clone OR Zero-Clone (curl | python3 -)
     local_mode = is_local_repo()
     venv_dir = (Path(__file__).resolve().parent / ".venv") if local_mode else (APP_HOME / "venv")
     py_bin, cli_bin = get_venv_paths(venv_dir)
@@ -102,10 +126,8 @@ def setup_environment(skip_deps: bool = False) -> tuple[Path, list[str]]:
 
         print_ok("Package 'agentic-cad-mcp' installed successfully.")
 
-    # Prefer the installed console_script entrypoint if present
     if cli_bin.exists():
         return cli_bin, []
-    # Fallback to running python -m mcp_cad_server.server
     return py_bin, ["-u", "-m", "mcp_cad_server.server"]
 
 
