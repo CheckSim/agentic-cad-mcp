@@ -31,10 +31,7 @@ agentic-cad-mcp-setup = "install:main"
 
 [tool.setuptools]
 py-modules = ["install"]
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["mcp_cad_server*"]
+packages = ["mcp_cad_server"]
 
 [tool.setuptools.package-data]
 mcp_cad_server = ["AGENTS.md"]

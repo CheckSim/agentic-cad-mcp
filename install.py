@@ -89,17 +89,17 @@ def setup_environment(skip_deps: bool = False) -> tuple[Path, list[str]]:
     """
     # CASE 1: Running via 'agentic-cad-mcp-setup' after 'pip install'
     if is_already_installed_package():
-        current_py = Path(sys.executable).resolve()
-        current_bin_dir = current_py.parent
-        cli_name = "agentic-cad-mcp.exe" if platform.system() == "Windows" else "agentic-cad-mcp"
-        cli_bin = current_bin_dir / cli_name
+        # CRITICAL: Use sys.prefix (NOT Path(sys.executable).resolve()) so we keep
+        # the .venv/bin/python symlink instead of resolving to /usr/local/Cellar/...
+        venv_root = Path(sys.prefix)
+        py_bin, cli_bin = get_venv_paths(venv_root)
 
-        print_step(f"Detected pre-installed package in {current_bin_dir.parent}")
+        print_step(f"Detected pre-installed package in {venv_root}")
         print_ok("Skipping environment creation and dependency installation.")
 
         if cli_bin.exists():
             return cli_bin, []
-        return current_py, ["-u", "-m", "mcp_cad_server.server"]
+        return py_bin, ["-u", "-m", "mcp_cad_server.server"]
 
     # CASE 2 & 3: Local repo clone OR Zero-Clone (curl | python3 -)
     local_mode = is_local_repo()
