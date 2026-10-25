@@ -1,0 +1,31 @@
+# Python virtual environments & caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# macOS system files
+.DS_Store
+
+# Generated project artifacts (keep folder structure via projects/.gitkeep)
+projects/*
+!projects/.gitkeep
+!projects/example_monitor_organizer/
+
+# Local MCP client configs (generated dynamically by install.py)
+.mcp.json
+.agents/
+.codex/
+.cursor/
+.claude/
+
+# Python build & packaging artifacts
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.DS_Store

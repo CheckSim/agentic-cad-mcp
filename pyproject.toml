@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentic-cad-mcp"
+version = "0.1.0"
+description = "Deterministic Text & Sketch to 3D-Printable STL MCP Server using build123d"
+readme = "README.md"
+license = { file = "LICENSE.md" }
+requires-python = ">=3.11"
+authors = [
+    { name = "Simone Cecconi" }
+]
+dependencies = [
+    "fastmcp>=0.4.0",
+    "build123d>=0.7.0",
+    "trimesh>=4.0.0",
+    "matplotlib>=3.8.0",
+    "numpy>=1.26.0",
+    "scipy>=1.11.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/CheckSim/agentic-cad-mcp"
+Repository = "https://github.com/CheckSim/agentic-cad-mcp.git"
+
+[project.scripts]
+agentic-cad-mcp = "mcp_cad_server.server:main"
+agentic-cad-mcp-setup = "install:main"
+
+[tool.setuptools]
+py-modules = ["install"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mcp_cad_server*"]
+
+[tool.setuptools.package-data]
+mcp_cad_server = ["AGENTS.md"]
