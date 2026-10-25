@@ -63,8 +63,6 @@ cd agentic-cad-mcp
 python3 install.py
 ```
 
-> **Note for macOS 13 (Ventura) users:** The installer automatically detects macOS 13 and pins `cadquery-ocp<7.8` so pre-built binary wheels install cleanly without compiling from source.
-
 ### Optional: Install `f3d` for Shaded Studio Renders
 
 By default, the MCP server generates a 4-view orthographic & isometric technical blueprint using `matplotlib`. If [F3D](https://f3d.app/) is installed on your system, the server will also generate a shaded 3D studio render with ambient occlusion:

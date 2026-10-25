@@ -94,16 +94,6 @@ def setup_environment(skip_deps: bool = False) -> tuple[Path, list[str]]:
         print_step("Installing agentic-cad-mcp & CAD engine (build123d, trimesh, matplotlib)...")
         subprocess.run([str(py_bin), "-m", "pip", "install", "--upgrade", "pip", "-q"], check=True)
 
-        # macOS 13 (Ventura) binary wheel compatibility fix
-        if platform.system() == "Darwin":
-            mac_ver = platform.mac_ver()[0]
-            if mac_ver and int(mac_ver.split(".")[0]) <= 13:
-                print_warn(f"Detected macOS {mac_ver}: pinning cadquery-ocp<7.8...")
-                subprocess.run(
-                    [str(py_bin), "-m", "pip", "install", "cadquery-ocp<7.8", "build123d"],
-                    check=True,
-                )
-
         if local_mode:
             repo_root = Path(__file__).resolve().parent
             subprocess.run([str(py_bin), "-m", "pip", "install", "-e", str(repo_root)], check=True)
